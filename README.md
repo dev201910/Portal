@@ -37,9 +37,6 @@ Portal is a powerful iOS/iPadOS app signer and installer that lets you sign, man
 
 Visit [releases](https://github.com/aoyn1xw/Portal/releases) and get the latest `.ipa`.
 
-<a href="https://celloserenity.github.io/altdirect/?url=https://raw.githubusercontent.com/aoyn1xw/Portal/refs/heads/main/app-repo.json" target="_blank">
-   <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/AltSource_Blue.png?raw=true" alt="Add AltSource" width="200">
-</a>
 <a href="https://github.com/aoyn1xw/Portal/releases/latest/download/Portal.ipa" target="_blank">
    <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/Download_Blue.png?raw=true" alt="Download .ipa" width="200">
 </a>
