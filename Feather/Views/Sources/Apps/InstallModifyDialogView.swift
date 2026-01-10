@@ -7,144 +7,158 @@ struct InstallModifyDialogView: View {
 	let app: AppInfoPresentable
 	
 	@State private var showInstallPreview = false
+	@State private var animateSuccess = false
 	
 	var body: some View {
-		NavigationView {
+		ZStack {
+			// Background gradient
+			LinearGradient(
+				colors: [
+					Color.green.opacity(0.08),
+					Color(.systemBackground)
+				],
+				startPoint: .top,
+				endPoint: .center
+			)
+			.ignoresSafeArea()
+			
 			VStack(spacing: 0) {
-				// Success icon and message
-				VStack(spacing: 20) {
-					// Animated success icon
+				// Drag indicator
+				Capsule()
+					.fill(Color.secondary.opacity(0.3))
+					.frame(width: 36, height: 5)
+					.padding(.top, 8)
+				
+				// Success header
+				VStack(spacing: 16) {
+					// Animated success icon with rings
 					ZStack {
+						// Outer pulse ring
+						Circle()
+							.stroke(Color.green.opacity(0.2), lineWidth: 2)
+							.frame(width: 90, height: 90)
+							.scaleEffect(animateSuccess ? 1.2 : 1.0)
+							.opacity(animateSuccess ? 0 : 0.5)
+						
+						// Middle ring
+						Circle()
+							.stroke(Color.green.opacity(0.3), lineWidth: 3)
+							.frame(width: 70, height: 70)
+						
+						// Inner filled circle
 						Circle()
 							.fill(
-								LinearGradient(
-									colors: [Color.green.opacity(0.2), Color.green.opacity(0.1)],
-									startPoint: .topLeading,
-									endPoint: .bottomTrailing
-								)
-							)
-							.frame(width: 100, height: 100)
-						
-						Image(systemName: "checkmark.circle.fill")
-							.font(.system(size: 60, weight: .medium))
-							.foregroundStyle(
 								LinearGradient(
 									colors: [Color.green, Color.green.opacity(0.8)],
 									startPoint: .topLeading,
 									endPoint: .bottomTrailing
 								)
 							)
+							.frame(width: 56, height: 56)
+							.shadow(color: Color.green.opacity(0.4), radius: 12, x: 0, y: 4)
+						
+						Image(systemName: "checkmark")
+							.font(.system(size: 28, weight: .bold))
+							.foregroundStyle(.white)
 					}
-					.shadow(color: Color.green.opacity(0.3), radius: 15, x: 0, y: 5)
+					.onAppear {
+						withAnimation(.easeOut(duration: 1.5).repeatForever(autoreverses: false)) {
+							animateSuccess = true
+						}
+					}
 					
-					VStack(spacing: 8) {
-						Text("App Downloaded Successfully")
-							.font(.title2)
-							.fontWeight(.bold)
+					VStack(spacing: 6) {
+						Text("Download Complete")
+							.font(.system(size: 22, weight: .bold, design: .rounded))
 							.foregroundStyle(.primary)
 						
-						Text("What would you like to do with \(app.name ?? "this app")?")
-							.font(.subheadline)
+						Text("Choose an action for your app")
+							.font(.system(size: 14, weight: .medium))
 							.foregroundStyle(.secondary)
-							.multilineTextAlignment(.center)
-							.padding(.horizontal, 20)
 					}
 				}
-				.padding(.top, 40)
-				.padding(.bottom, 30)
+				.padding(.top, 24)
+				.padding(.bottom, 20)
 				
-				// App info card
+				// App info card - compact
 				appInfoCard
 					.padding(.horizontal, 20)
-					.padding(.bottom, 30)
+					.padding(.bottom, 20)
 				
-				// Action buttons
-				VStack(spacing: 12) {
-					// Sign & Install button
+				// Action buttons - modern style
+				VStack(spacing: 10) {
+					// Sign & Install button - primary action
 					Button {
 						dismiss()
-						// Trigger signing and installation
 						DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
 							showInstallPreview = true
 						}
 					} label: {
 						HStack(spacing: 10) {
-							Image(systemName: "checkmark.seal.fill")
-								.font(.system(size: 16, weight: .semibold))
+							Image(systemName: "arrow.down.app.fill")
+								.font(.system(size: 18, weight: .semibold))
 							Text("Sign & Install")
-								.font(.system(size: 17, weight: .semibold))
+								.font(.system(size: 16, weight: .bold))
 						}
 						.foregroundStyle(.white)
 						.frame(maxWidth: .infinity)
-						.padding(.vertical, 16)
+						.padding(.vertical, 14)
 						.background(
 							LinearGradient(
-								colors: [Color.green, Color.green.opacity(0.9)],
-								startPoint: .topLeading,
-								endPoint: .bottomTrailing
+								colors: [Color.green, Color.green.opacity(0.85)],
+								startPoint: .leading,
+								endPoint: .trailing
 							)
 						)
-						.clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-						.shadow(color: Color.green.opacity(0.4), radius: 10, x: 0, y: 5)
+						.clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+						.shadow(color: Color.green.opacity(0.3), radius: 8, x: 0, y: 4)
 					}
 					
-					// Modify button
-					Button {
-						dismiss()
-						// Open signing view for modification
-						DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-							NotificationCenter.default.post(
-								name: Notification.Name("Feather.openSigningView"),
-								object: app
-							)
-						}
-					} label: {
-						HStack(spacing: 10) {
-							Image(systemName: "slider.horizontal.3")
-								.font(.system(size: 16, weight: .semibold))
-							Text("Modify")
-								.font(.system(size: 17, weight: .semibold))
-						}
-						.foregroundStyle(.white)
-						.frame(maxWidth: .infinity)
-						.padding(.vertical, 16)
-						.background(
-							LinearGradient(
-								colors: [Color.accentColor, Color.accentColor.opacity(0.9)],
-								startPoint: .topLeading,
-								endPoint: .bottomTrailing
-							)
-						)
-						.clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-						.shadow(color: Color.accentColor.opacity(0.4), radius: 10, x: 0, y: 5)
-					}
-					
-					// Cancel button
-					Button {
-						dismiss()
-					} label: {
-						Text("Cancel")
-							.font(.system(size: 17, weight: .medium))
-							.foregroundStyle(.secondary)
+					// Secondary actions row
+					HStack(spacing: 10) {
+						// Modify button
+						Button {
+							dismiss()
+							DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+								NotificationCenter.default.post(
+									name: Notification.Name("Feather.openSigningView"),
+									object: app
+								)
+							}
+						} label: {
+							HStack(spacing: 6) {
+								Image(systemName: "slider.horizontal.3")
+									.font(.system(size: 14, weight: .semibold))
+								Text("Modify")
+									.font(.system(size: 14, weight: .semibold))
+							}
+							.foregroundStyle(.white)
 							.frame(maxWidth: .infinity)
-							.padding(.vertical, 16)
-							.background(
-								RoundedRectangle(cornerRadius: 14, style: .continuous)
-									.fill(Color(UIColor.tertiarySystemBackground))
-							)
+							.padding(.vertical, 12)
+							.background(Color.accentColor)
+							.clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+						}
+						
+						// Later button
+						Button {
+							dismiss()
+						} label: {
+							HStack(spacing: 6) {
+								Image(systemName: "clock")
+									.font(.system(size: 14, weight: .semibold))
+								Text("Later")
+									.font(.system(size: 14, weight: .semibold))
+							}
+							.foregroundStyle(.primary)
+							.frame(maxWidth: .infinity)
+							.padding(.vertical, 12)
+							.background(Color(.secondarySystemGroupedBackground))
+							.clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+						}
 					}
 				}
 				.padding(.horizontal, 20)
-				.padding(.bottom, 20)
-				
-				Spacer()
-			}
-			.navigationBarTitleDisplayMode(.inline)
-			.toolbar {
-				ToolbarItem(placement: .principal) {
-					Text("Download Complete")
-						.font(.headline)
-				}
+				.padding(.bottom, 24)
 			}
 		}
 		.sheet(isPresented: $showInstallPreview) {
@@ -166,8 +180,8 @@ struct InstallModifyDialogView: View {
 						image
 							.resizable()
 							.aspectRatio(contentMode: .fill)
-							.frame(width: 50, height: 50)
-							.clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+							.frame(width: 48, height: 48)
+							.clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
 					case .failure:
 						iconPlaceholder
 					@unknown default:
@@ -179,45 +193,53 @@ struct InstallModifyDialogView: View {
 			}
 			
 			// App info
-			VStack(alignment: .leading, spacing: 4) {
+			VStack(alignment: .leading, spacing: 3) {
 				Text(app.name ?? "Unknown")
-					.font(.system(size: 16, weight: .semibold))
+					.font(.system(size: 15, weight: .semibold))
 					.foregroundStyle(.primary)
+					.lineLimit(1)
 				
-				if let version = app.version {
-					Text("Version \(version)")
-						.font(.system(size: 13))
-						.foregroundStyle(.secondary)
+				HStack(spacing: 8) {
+					if let version = app.version {
+						Label(version, systemImage: "number")
+							.font(.system(size: 11, weight: .medium))
+							.foregroundStyle(.secondary)
+					}
+					
+					if let size = (app as? Signed)?.size ?? (app as? Imported)?.size {
+						Label(size.formattedByteCount, systemImage: "internaldrive")
+							.font(.system(size: 11, weight: .medium))
+							.foregroundStyle(.secondary)
+					}
 				}
-				
-				if let identifier = app.identifier {
-					Text(identifier)
-						.font(.system(size: 11))
-						.foregroundStyle(.tertiary)
-						.lineLimit(1)
-				}
+				.labelStyle(.titleOnly)
 			}
 			
 			Spacer()
+			
+			// Ready badge
+			Text("Ready")
+				.font(.system(size: 10, weight: .bold))
+				.foregroundStyle(.green)
+				.padding(.horizontal, 8)
+				.padding(.vertical, 4)
+				.background(Color.green.opacity(0.15))
+				.clipShape(Capsule())
 		}
-		.padding(16)
+		.padding(12)
 		.background(
 			RoundedRectangle(cornerRadius: 14, style: .continuous)
-				.fill(Color(UIColor.secondarySystemGroupedBackground))
-		)
-		.overlay(
-			RoundedRectangle(cornerRadius: 14, style: .continuous)
-				.stroke(Color.primary.opacity(0.1), lineWidth: 1)
+				.fill(Color(.secondarySystemGroupedBackground))
 		)
 	}
 	
 	private var iconPlaceholder: some View {
-		RoundedRectangle(cornerRadius: 12, style: .continuous)
-			.fill(Color.secondary.opacity(0.2))
-			.frame(width: 50, height: 50)
+		RoundedRectangle(cornerRadius: 11, style: .continuous)
+			.fill(Color.secondary.opacity(0.15))
+			.frame(width: 48, height: 48)
 			.overlay(
 				Image(systemName: "app.fill")
-					.font(.system(size: 22))
+					.font(.system(size: 20))
 					.foregroundStyle(.secondary)
 			)
 	}

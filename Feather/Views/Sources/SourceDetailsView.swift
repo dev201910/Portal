@@ -42,10 +42,11 @@ struct SourceDetailsView: View {
     
     var body: some View {
         ZStack {
-            // Gradient background based on source icon color
+            // Gradient background based on source icon color - increased intensity
             LinearGradient(
                 colors: [
-                    dominantColor.opacity(0.15),
+                    dominantColor.opacity(0.25),
+                    dominantColor.opacity(0.12),
                     dominantColor.opacity(0.05),
                     Color(.systemBackground)
                 ],
@@ -393,53 +394,56 @@ struct SourceDetailsView: View {
         }
     }
     
-    // MARK: - App Feed Card (Large rounded, elevated, layered)
+    // MARK: - App Feed Card (Clean, no background)
     private func appFeedCard(_ app: ASRepository.App) -> some View {
-        HStack(spacing: 16) {
-            // App icon with thumbnail treatment
-            ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(dominantColor.opacity(0.12))
-                    .frame(width: 60, height: 60)
-                
-                if let iconURL = app.iconURL {
-                    LazyImage(url: iconURL) { state in
-                        if let image = state.image {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 48, height: 48)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        } else {
-                            Image(systemName: "app.fill")
-                                .font(.system(size: 24))
-                                .foregroundStyle(.white.opacity(0.6))
-                        }
+        HStack(spacing: 14) {
+            // App icon
+            if let iconURL = app.iconURL {
+                LazyImage(url: iconURL) { state in
+                    if let image = state.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 52, height: 52)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    } else {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(dominantColor.opacity(0.15))
+                            .frame(width: 52, height: 52)
+                            .overlay(
+                                Image(systemName: "app.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(dominantColor.opacity(0.5))
+                            )
                     }
-                } else {
-                    Image(systemName: "app.fill")
-                        .font(.system(size: 24))
-                        .foregroundStyle(.white.opacity(0.6))
                 }
+            } else {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(dominantColor.opacity(0.15))
+                    .frame(width: 52, height: 52)
+                    .overlay(
+                        Image(systemName: "app.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(dominantColor.opacity(0.5))
+                    )
             }
-            .shadow(color: dominantColor.opacity(0.3), radius: 6, x: 0, y: 3)
             
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(app.name ?? "Unknown")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
                 
                 if let subtitle = app.subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
                 
                 if let version = app.currentVersion {
                     Text("v\(version)")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(dominantColor)
                 }
             }
@@ -447,19 +451,10 @@ struct SourceDetailsView: View {
             Spacer()
             
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.4))
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.tertiary)
         }
-        .padding(18)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-                )
-        )
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .padding(.vertical, 8)
     }
     
     // MARK: - Empty Apps State
