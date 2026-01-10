@@ -217,7 +217,6 @@ extension DownloadManager: URLSessionDownloadDelegate {
 					DownloadManager.shared.downloads.remove(at: index)
 					self._updateBackgroundAudioState()
 				}
-				}
 			}
 		}
 	}
