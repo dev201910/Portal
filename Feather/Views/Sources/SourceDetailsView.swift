@@ -160,6 +160,7 @@ struct SourceDetailsView: View {
 			if let repo = repository {
 				VStack(spacing: 8) {
 					Divider()
+						.background(dominantColor.opacity(0.3))
 					
 					HStack {
 						if let identifier = repo.id {
@@ -193,7 +194,34 @@ struct SourceDetailsView: View {
 			}
 		}
 		.padding(20)
-		.background(accentedGradient(cornerRadius: 16))
+		.background(
+			RoundedRectangle(cornerRadius: 20, style: .continuous)
+				.fill(
+					LinearGradient(
+						colors: [
+							dominantColor.opacity(0.25),
+							dominantColor.opacity(0.15),
+							Color(UIColor.secondarySystemGroupedBackground).opacity(0.95),
+							dominantColor.opacity(0.1)
+						],
+						startPoint: .topLeading,
+						endPoint: .bottomTrailing
+					)
+				)
+		)
+		.clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+		.overlay(
+			RoundedRectangle(cornerRadius: 20, style: .continuous)
+				.stroke(
+					LinearGradient(
+						colors: [dominantColor.opacity(0.5), dominantColor.opacity(0.25)],
+						startPoint: .topLeading,
+						endPoint: .bottomTrailing
+					),
+					lineWidth: 2
+				)
+		)
+		.shadow(color: dominantColor.opacity(0.35), radius: 15, x: 0, y: 6)
 	}
 	
 	// MARK: - Search Bar
