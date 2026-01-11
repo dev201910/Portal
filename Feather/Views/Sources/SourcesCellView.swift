@@ -76,25 +76,21 @@ struct SourcesCellView: View {
 	var body: some View {
 		let isPinned = viewModel.isPinned(source)
 		
-		HStack(spacing: 12) {
-			// Icon - slightly larger and more prominent
+		HStack(spacing: 10) {
+			// Icon - compact
 			iconView
 			
 			// Title with app count
-			VStack(alignment: .leading, spacing: 2) {
+			VStack(alignment: .leading, spacing: 1) {
 				Text(source.name ?? .localized("Unknown"))
-					.font(.system(size: 14, weight: .semibold))
+					.font(.system(size: 13, weight: .medium))
 					.foregroundStyle(.primary)
 					.lineLimit(1)
 				
 				if let appCount = viewModel.sources[source]?.apps.count, appCount > 0 {
-					HStack(spacing: 3) {
-						Image(systemName: "app.fill")
-							.font(.system(size: 7))
-						Text("\(appCount) \(appCount == 1 ? "app" : "apps")")
-							.font(.system(size: 9, weight: .medium))
-					}
-					.foregroundStyle(.secondary)
+					Text("\(appCount) \(appCount == 1 ? "app" : "apps")")
+						.font(.system(size: 10, weight: .regular))
+						.foregroundStyle(.secondary)
 				}
 			}
 			
@@ -102,14 +98,13 @@ struct SourcesCellView: View {
 			
 			if isPinned {
 				Image(systemName: "pin.fill")
-					.font(.system(size: 9))
+					.font(.system(size: 8))
 					.foregroundStyle(dominantColor)
-					.padding(5)
-					.background(
-						Circle()
-							.fill(dominantColor.opacity(0.12))
-					)
 			}
+			
+			Image(systemName: "chevron.right")
+				.font(.system(size: 10, weight: .medium))
+				.foregroundStyle(.tertiary)
 		}
 		.padding(.horizontal, 8)
 		.padding(.vertical, 6)

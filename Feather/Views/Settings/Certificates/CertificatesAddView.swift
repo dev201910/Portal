@@ -93,16 +93,16 @@ struct CertificatesAddView: View {
         Button {
             _isImportingZipPresenting = true
         } label: {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Image(systemName: "doc.zipper")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
-                Text("Import from ZIP")
-                    .font(.system(size: 15, weight: .semibold))
+                Text("Import ZIP")
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(.vertical, 10)
             .background(
                 LinearGradient(
                     colors: [Color.purple, Color.purple.opacity(0.8)],
@@ -110,9 +110,79 @@ struct CertificatesAddView: View {
                     endPoint: .trailing
                 )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .shadow(color: Color.purple.opacity(0.3), radius: 6, x: 0, y: 3)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .shadow(color: Color.purple.opacity(0.2), radius: 4, x: 0, y: 2)
         }
+    }
+    
+    // MARK: - Compact Import Card Small (for side by side layout)
+    @ViewBuilder
+    private func compactImportCardSmall(
+        title: String,
+        subtitle: String,
+        icon: String,
+        isSelected: Bool,
+        color: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    isSelected ? Color.green.opacity(0.2) : color.opacity(0.2),
+                                    isSelected ? Color.green.opacity(0.1) : color.opacity(0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : icon)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(isSelected ? .green : color)
+                }
+                
+                VStack(spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(isSelected ? .secondary : .primary)
+                    
+                    Text(subtitle)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(isSelected ? .green : .secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                isSelected ? Color.green.opacity(0.08) : color.opacity(0.06),
+                                isSelected ? Color.green.opacity(0.04) : color.opacity(0.03)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(
+                        isSelected ? Color.green.opacity(0.3) : color.opacity(0.2),
+                        lineWidth: 1.5
+                    )
+            )
+        }
+        .disabled(isSelected)
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
     
     // MARK: - Divider Section

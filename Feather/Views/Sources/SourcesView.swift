@@ -162,6 +162,7 @@ struct SourcesView: View {
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 
                 Text("Manage your sources")
                     .font(.system(size: 12, weight: .medium))

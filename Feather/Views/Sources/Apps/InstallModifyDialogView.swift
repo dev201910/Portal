@@ -7,6 +7,7 @@ struct InstallModifyDialogView: View {
 	let app: AppInfoPresentable
 	
 	@State private var showInstallPreview = false
+	@State private var animateSuccess = false
 	
 	var body: some View {
 		NavigationView {
@@ -70,10 +71,10 @@ struct InstallModifyDialogView: View {
 					.padding(.top, 50)
 					.padding(.bottom, 30)
 				
-				// App info card
+				// App info card - compact
 				appInfoCard
 					.padding(.horizontal, 20)
-					.padding(.bottom, 30)
+					.padding(.bottom, 20)
 				
 					// Action buttons
 					VStack(spacing: 14) {
@@ -179,8 +180,8 @@ struct InstallModifyDialogView: View {
 						image
 							.resizable()
 							.aspectRatio(contentMode: .fill)
-							.frame(width: 50, height: 50)
-							.clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+							.frame(width: 48, height: 48)
+							.clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
 					case .failure:
 						iconPlaceholder
 					@unknown default:
@@ -192,26 +193,38 @@ struct InstallModifyDialogView: View {
 			}
 			
 			// App info
-			VStack(alignment: .leading, spacing: 4) {
+			VStack(alignment: .leading, spacing: 3) {
 				Text(app.name ?? "Unknown")
-					.font(.system(size: 16, weight: .semibold))
+					.font(.system(size: 15, weight: .semibold))
 					.foregroundStyle(.primary)
+					.lineLimit(1)
 				
-				if let version = app.version {
-					Text("Version \(version)")
-						.font(.system(size: 13))
-						.foregroundStyle(.secondary)
+				HStack(spacing: 8) {
+					if let version = app.version {
+						Label(version, systemImage: "number")
+							.font(.system(size: 11, weight: .medium))
+							.foregroundStyle(.secondary)
+					}
+					
+					if let size = (app as? Signed)?.size ?? (app as? Imported)?.size {
+						Label(size.formattedByteCount, systemImage: "internaldrive")
+							.font(.system(size: 11, weight: .medium))
+							.foregroundStyle(.secondary)
+					}
 				}
-				
-				if let identifier = app.identifier {
-					Text(identifier)
-						.font(.system(size: 11))
-						.foregroundStyle(.tertiary)
-						.lineLimit(1)
-				}
+				.labelStyle(.titleOnly)
 			}
 			
 			Spacer()
+			
+			// Ready badge
+			Text("Ready")
+				.font(.system(size: 10, weight: .bold))
+				.foregroundStyle(.green)
+				.padding(.horizontal, 8)
+				.padding(.vertical, 4)
+				.background(Color.green.opacity(0.15))
+				.clipShape(Capsule())
 		}
 		.padding(18)
 		.background(
@@ -234,12 +247,12 @@ struct InstallModifyDialogView: View {
 	}
 	
 	private var iconPlaceholder: some View {
-		RoundedRectangle(cornerRadius: 12, style: .continuous)
-			.fill(Color.secondary.opacity(0.2))
-			.frame(width: 50, height: 50)
+		RoundedRectangle(cornerRadius: 11, style: .continuous)
+			.fill(Color.secondary.opacity(0.15))
+			.frame(width: 48, height: 48)
 			.overlay(
 				Image(systemName: "app.fill")
-					.font(.system(size: 22))
+					.font(.system(size: 20))
 					.foregroundStyle(.secondary)
 			)
 	}

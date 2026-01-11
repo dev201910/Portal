@@ -80,31 +80,34 @@ struct SourceAppsDetailView: View {
 						.padding(.horizontal)
 				}
 				
-				// Information section with rounded container
+				// Information section - Modern grid layout
 				NBSection(.localized("Information")) {
-					VStack(spacing: 12) {
+					LazyVGrid(columns: [
+						GridItem(.flexible(), spacing: 12),
+						GridItem(.flexible(), spacing: 12)
+					], spacing: 12) {
 						if let sourceName = source.name {
-							_infoRow(title: .localized("Source"), value: sourceName, icon: "globe")
+							modernInfoCard(title: .localized("Source"), value: sourceName, icon: "globe", color: .blue)
 						}
 						
 						if let developer = app.developer {
-							_infoRow(title: .localized("Developer"), value: developer, icon: "person.circle")
+							modernInfoCard(title: .localized("Developer"), value: developer, icon: "person.circle.fill", color: .purple)
 						}
 						
 						if let size = app.size {
-							_infoRow(title: .localized("App Size"), value: size.formattedByteCount, icon: "archivebox")
+							modernInfoCard(title: .localized("Size"), value: size.formattedByteCount, icon: "internaldrive.fill", color: .orange)
 						}
 						
 						if let category = app.category {
-							_infoRow(title: .localized("Category"), value: category.capitalized, icon: "tag")
+							modernInfoCard(title: .localized("Category"), value: category.capitalized, icon: "tag.fill", color: .pink)
 						}
 						
 						if let version = app.currentVersion {
-							_infoRow(title: .localized("Version"), value: version, icon: "number")
+							modernInfoCard(title: .localized("Version"), value: version, icon: "number.circle.fill", color: .green)
 						}
 						
 						if let date = app.currentDate?.date {
-							_infoRow(title: .localized("Updated"), value: DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none), icon: "calendar")
+							modernInfoCard(title: .localized("Updated"), value: DateFormatter.localizedString(from: date, dateStyle: .short, timeStyle: .none), icon: "calendar.circle.fill", color: .cyan)
 						}
 						
 							if let bundleId = app.id {
@@ -403,6 +406,37 @@ extension SourceAppsDetailView {
 			}
 		}
 		Divider()
+	}
+	
+	@ViewBuilder
+	private func modernInfoCard(title: String, value: String, icon: String, color: Color) -> some View {
+		VStack(alignment: .leading, spacing: 8) {
+			ZStack {
+				Circle()
+					.fill(color.opacity(0.15))
+					.frame(width: 32, height: 32)
+				Image(systemName: icon)
+					.font(.system(size: 14, weight: .semibold))
+					.foregroundStyle(color)
+			}
+			
+			VStack(alignment: .leading, spacing: 2) {
+				Text(title)
+					.font(.system(size: 10, weight: .medium))
+					.foregroundStyle(.secondary)
+					.textCase(.uppercase)
+				Text(value)
+					.font(.system(size: 13, weight: .semibold))
+					.foregroundStyle(.primary)
+					.lineLimit(1)
+			}
+		}
+		.frame(maxWidth: .infinity, alignment: .leading)
+		.padding(12)
+		.background(
+			RoundedRectangle(cornerRadius: 14, style: .continuous)
+				.fill(Color(.secondarySystemGroupedBackground))
+		)
 	}
 	
 	@ViewBuilder
