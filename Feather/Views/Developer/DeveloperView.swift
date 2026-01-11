@@ -1682,6 +1682,9 @@ struct IPAIntegrityCheckerView: View {
         }
     }
     
+    private static let maxProvisioningFileSize: Int64 = 10 * 1024 * 1024 // 10 MB limit
+    private static let provisioningWarningDays: TimeInterval = 7 * 24 * 3600 // 7 days
+    
     private func performIntegrityChecks(url: URL) async throws -> IntegrityResults {
         let fileManager = FileManager.default
         
@@ -1724,7 +1727,7 @@ struct IPAIntegrityCheckerView: View {
             try? fileManager.removeItem(at: tempDir)
         }
         
-        // Extract IPA
+        // Extract IPA (using ZIPFoundation extension)
         do {
             try fileManager.unzipItem(at: url, to: tempDir)
         } catch {
@@ -1758,30 +1761,37 @@ struct IPAIntegrityCheckerView: View {
                     errors.append("Invalid or missing Info.plist")
                 }
                 
-                // Check provisioning profile
+                // Check provisioning profile with size limits
                 let provisioningURL = appBundle.appendingPathComponent("embedded.mobileprovision")
                 if fileManager.fileExists(atPath: provisioningURL.path) {
-                    hasValidProvisioning = true
-                    
-                    // Parse provisioning profile
-                    if let data = try? Data(contentsOf: provisioningURL),
-                       let dataString = String(data: data, encoding: .ascii) ?? String(data: data, encoding: .utf8),
-                       let plistStart = dataString.range(of: "<?xml"),
-                       let plistEnd = dataString.range(of: "</plist>") {
-                        let plistString = String(dataString[plistStart.lowerBound...plistEnd.upperBound])
-                        if let plistData = plistString.data(using: .utf8),
-                           let plist = try? PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any] {
-                            if let expirationDate = plist["ExpirationDate"] as? Date {
-                                provisioningExpiryDate = expirationDate
-                                provisioningExpired = expirationDate < Date()
-                                
-                                if provisioningExpired {
-                                    errors.append("Provisioning profile has expired")
-                                } else if expirationDate.timeIntervalSinceNow < 7 * 24 * 3600 {
-                                    warnings.append("Provisioning profile expires soon")
+                    // Check file size before loading
+                    if let provisioningAttrs = try? fileManager.attributesOfItem(atPath: provisioningURL.path),
+                       let provisioningSize = provisioningAttrs[.size] as? Int64,
+                       provisioningSize <= Self.maxProvisioningFileSize {
+                        hasValidProvisioning = true
+                        
+                        // Parse provisioning profile
+                        if let data = try? Data(contentsOf: provisioningURL),
+                           let dataString = String(data: data, encoding: .ascii) ?? String(data: data, encoding: .utf8),
+                           let plistStart = dataString.range(of: "<?xml"),
+                           let plistEnd = dataString.range(of: "</plist>") {
+                            let plistString = String(dataString[plistStart.lowerBound...plistEnd.upperBound])
+                            if let plistData = plistString.data(using: .utf8),
+                               let plist = try? PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any] {
+                                if let expirationDate = plist["ExpirationDate"] as? Date {
+                                    provisioningExpiryDate = expirationDate
+                                    provisioningExpired = expirationDate < Date()
+                                    
+                                    if provisioningExpired {
+                                        errors.append("Provisioning profile has expired")
+                                    } else if expirationDate.timeIntervalSinceNow < Self.provisioningWarningDays {
+                                        warnings.append("Provisioning profile expires soon")
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        warnings.append("Provisioning profile file too large or invalid")
                     }
                 } else {
                     warnings.append("No embedded provisioning profile found")
@@ -1804,12 +1814,12 @@ struct IPAIntegrityCheckerView: View {
                     }
                 }
                 
-                // Count dylibs
+                // Count dylibs (may be injected tweaks or legitimate dependencies)
                 if let files = try? fileManager.contentsOfDirectory(at: appBundle, includingPropertiesForKeys: nil) {
                     dylibsCount = files.filter { $0.pathExtension == "dylib" }.count
                     
                     if dylibsCount > 0 {
-                        warnings.append("Found \(dylibsCount) injected dynamic libraries")
+                        warnings.append("Found \(dylibsCount) dynamic libraries (may be tweaks or legitimate dependencies)")
                     }
                 }
                 

@@ -162,11 +162,12 @@ struct FeatherApp: App {
                 
                 // Get current version
                 let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
+                let releaseVersion = release.tagName.replacingOccurrences(of: "v", with: "")
                 
-                // Compare versions (simple string comparison for now)
-                if release.tagName.replacingOccurrences(of: "v", with: "") > currentVersion {
+                // Compare versions using proper semantic versioning
+                if self.compareVersions(releaseVersion, currentVersion) == .orderedDescending {
                     DispatchQueue.main.async {
-                        self.latestVersion = release.tagName.replacingOccurrences(of: "v", with: "")
+                        self.latestVersion = releaseVersion
                         self.showUpdateBanner = true
                         AppLogManager.shared.info("Update available: \(release.tagName)", category: "Updates")
                     }
@@ -177,6 +178,28 @@ struct FeatherApp: App {
                 AppLogManager.shared.warning("Failed to parse update info: \(error.localizedDescription)", category: "Updates")
             }
         }.resume()
+    }
+    
+    /// Compare two semantic version strings (e.g., "1.2.3" vs "1.3.0")
+    /// Returns .orderedAscending if v1 < v2, .orderedDescending if v1 > v2, .orderedSame if equal
+    private func compareVersions(_ v1: String, _ v2: String) -> ComparisonResult {
+        let components1 = v1.split(separator: ".").compactMap { Int($0) }
+        let components2 = v2.split(separator: ".").compactMap { Int($0) }
+        
+        let maxLength = max(components1.count, components2.count)
+        
+        for i in 0..<maxLength {
+            let num1 = i < components1.count ? components1[i] : 0
+            let num2 = i < components2.count ? components2[i] : 0
+            
+            if num1 < num2 {
+                return .orderedAscending
+            } else if num1 > num2 {
+                return .orderedDescending
+            }
+        }
+        
+        return .orderedSame
     }
 	
 	private func _handleURL(_ url: URL) {
